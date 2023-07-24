@@ -1,50 +1,50 @@
 package com.example.multimedia
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.WallpaperManager
+import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
-
-    lateinit var img:ImageView
+    lateinit var edt:EditText
     lateinit var btn:Button
-
-
-//    var imageResource = resources.getIdentifier(uri, null, packageName);
-//    var res:Drawable=resources.getDrawable(imageResource,theme)
-
-
-    //val wallpaperManager=WallpaperManager.getInstance(applicationContext)
-    @SuppressLint("ResourceType")
+    var txt:Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        img=findViewById<View>(R.id.img) as ImageView
-        btn=findViewById<View>(R.id.btn) as Button
-        img.setImageResource(R.drawable.download)
-        val wallpaperManager=WallpaperManager.getInstance(applicationContext)
+        btn=findViewById(R.id.button)
 
         btn.setOnClickListener {
-            try{
-          //    img.setImageResource(R.drawable.download)
-                wallpaperManager.setResource(R.drawable.wallpaper)
-            }
-            catch (e: IOException) {
-                // here the errors can be logged instead of printStackTrace
-                e.printStackTrace()
-            }
+            stayAlert()
         }
+
+
     }
 
-
-
-
+    private fun stayAlert() {
+        val text = findViewById<View>(R.id.time) as EditText
+      val   secs = Integer.parseInt(text.text.toString())
+            val i = Intent(this, MyBroadcastReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(this.applicationContext, 2323232, i, 0)
+            val alarmmanger: AlarmManager = getSystemService(ALARM_SERVICE) as AlarmManager;
+            alarmmanger.set(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + (secs * 1000),
+                pendingIntent
+            );
+            Toast.makeText(this, "alarm Set in " + secs + "Seconds", Toast.LENGTH_LONG).show()
+        }
 
 
 
