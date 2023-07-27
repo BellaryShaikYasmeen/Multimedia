@@ -13,38 +13,70 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.multimedia.databinding.ActivityMainBinding
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.util.MimeTypes
+import com.google.android.exoplayer2.util.Util
 import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var edt:EditText
-    lateinit var btn:Button
-    var txt:Int = 0
+    private lateinit var binding: ActivityMainBinding
+
+    private var player: ExoPlayer? = null
+    private val isPlaying get() = player?.isPlaying ?: false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        btn=findViewById(R.id.button)
-
-        btn.setOnClickListener {
-            stayAlert()
-        }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
 
     }
 
-    private fun stayAlert() {
-        val text = findViewById<View>(R.id.time) as EditText
-      val   secs = Integer.parseInt(text.text.toString())
-            val i = Intent(this, MyBroadcastReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(this.applicationContext, 2323232, i, 0)
-            val alarmmanger: AlarmManager = getSystemService(ALARM_SERVICE) as AlarmManager;
-            alarmmanger.set(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + (secs * 1000),
-                pendingIntent
-            );
-            Toast.makeText(this, "alarm Set in " + secs + "Seconds", Toast.LENGTH_LONG).show()
+    override fun onStart() {
+        super.onStart()
+        initializePlayer()
+    }
+
+    private fun initializePlayer() {
+        player = ExoPlayer.Builder(this) // <- context
+            .build()
+
+        // create a media item.
+        val mediaItem = MediaItem.Builder()
+            .setUri("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4")
+            .setMimeType(MimeTypes.APPLICATION_MP4)
+            .build()
+
+        // Create a media source and pass the media item
+        val mediaSource = ProgressiveMediaSource.Factory(
+            DefaultDataSource.Factory(this) // <- context
+        )
+            .createMediaSource(mediaItem)
+
+        // Finally assign this media source to the player
+        player!!.apply {
+            setMediaSource(mediaSource)
+            play()
+            // start playing when the exoplayer has setup
+            seekTo(0, 0L) // Start from the beginning
+            prepare() // Change the state from idle.
+        }.also {
+            // Do not forget to attach the player to the view
+            binding.playerView.player = it
         }
+    }
+
+
+
+    override fun onResume() {
+        super.onResume()
+
+    }
 
 
 
